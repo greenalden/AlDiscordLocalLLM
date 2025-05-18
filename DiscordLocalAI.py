@@ -136,7 +136,7 @@ def generate_response(prompt, channel_id, messageAuthor):
         conversation_histories[channel_id] = history
     
     # Build the prompt with limited history
-    full_prompt = f"Below is a conversation between a human and an Friend on Discord. The name of the friend is {NAME}.\n\n"
+    full_prompt = f"Below is a conversation between a human and an Friend on Discord. The name of the friend is {NAME}. DO NOT INCLUDE {NAME} DISCORD NAME OR TIME INFORMATION IN THE RESPONSE. \n\n"
     
     for turn in history:
         if turn["role"] == "human":
