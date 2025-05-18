@@ -1,11 +1,63 @@
-This is a Discord chatbot powered by a local LLM. This is designed to use Google gemma-3-4b-it which can be found and obtained from here https://huggingface.co/google/gemma-3-4b-it. 
-This is a simple chatbot that can be used by multiple people at a time. It uses the typing indicator to show when it is thinking. It will respond to any message and is meant to be used in a DM.
-You will need to get a discord bot API key as well as download Google Gemma. This model is set up to run on the CPU given it is not super demanding and fast responses aren't needed.
+# Discord Local AI Chatbot
 
-Settup
+A Discord chatbot powered by a local Large Language Model (LLM), specifically designed to work with Google's Gemma-3-4b-it.
 
+## Features
 
-You will need to apply gfor acces to google gemma then git clone it somewhere on your computer.
-Within the code you will need to specify a few strings.
-YOu need to give your discord bot token, name that the bot should be called, and the location of Gemma.
-after that run the Setup.bat then the Run.bat and it should all be good.
+- Run a local AI assistant through Discord
+- Supports multiple concurrent conversations
+- Maintains conversation history for context
+- Shows typing indicator while processing responses
+- Optimized to run on CPU for accessibility
+- Ideal for direct messages (DMs)
+
+## Prerequisites
+
+- A Discord bot token (see [Discord Developer Portal](https://discord.com/developers/applications))
+- Access to [Google's Gemma-3-4b-it model](https://huggingface.co/google/gemma-3-4b-it)
+
+## Setup Instructions
+
+### 1. Obtain Model Access
+
+1. Request access to Google's Gemma-3-4b-it on [Hugging Face](https://huggingface.co/google/gemma-3-4b-it)
+2. Clone or download the model to your local machine
+
+### 2. Configure the Bot
+
+Edit `DiscordLocalAI.py` and update the following variables:
+
+```python
+DiscordBotToken = ""  # Your Discord Bot Token Here
+LLM_dir = r""         # Path to the Gemma model directory
+NAME = ""             # Name for your bot
+```
+
+### 3. Installation
+
+1. Run `Setup.bat` to install Python and required dependencies
+2. Once setup is complete, run `Run.bat` to start the bot
+
+## Usage
+
+After starting the bot, it will automatically respond to any messages sent to it in Discord. The bot maintains conversation history for each channel to provide contextual responses.
+
+## Customization
+
+You can modify these parameters in `DiscordLocalAI.py` to adjust the bot's behavior:
+
+- `MAX_HISTORY_TURNS`: Controls how many conversation turns to remember (default: 10)
+- `RESPONSE_TIMEOUT`: Maximum time in seconds allowed for response generation (default: 240)
+- Model generation parameters (temperature, top_p, etc.) can be tuned in the `generate_response` function
+
+## Troubleshooting
+
+- Check `bot_log.txt` for error messages and debugging information
+- Ensure your Discord bot has the necessary permissions in your server
+- Verify that the model path is correct and accessible
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This software is provided "as is", without warranty of any kind. Use at your own risk.
