@@ -29,7 +29,7 @@ Edit `DiscordLocalAI.py` and update the following variables:
 
 ```python
 DiscordBotToken = ""  # Your Discord Bot Token Here
-LLM_dir = r""         # Path to the Gemma model directory
+LLM_model_path = r""  # Path to the Gemma model directory
 NAME = ""             # Name for your bot
 ```
 
