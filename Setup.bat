@@ -96,7 +96,7 @@ pip install "https://github.com/oobabooga/exllamav2/releases/download/v0.2.8/exl
 pip install "https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.6cxx11abiFALSE-cp311-cp311-linux_x86_64.whl; platform_system == 'Linux' and platform_machine == 'x86_64' and python_version == '3.11'"
 pip install "https://github.com/oobabooga/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu124torch2.6.0cxx11abiFALSE-cp311-cp311-win_amd64.whl; platform_system == 'Windows' and python_version == '3.11'"
 
-
+pip install llama-cpp-python
 
 
 

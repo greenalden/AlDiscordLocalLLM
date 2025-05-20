@@ -14,13 +14,13 @@ A Discord chatbot powered by a local Large Language Model (LLM), specifically de
 ## Prerequisites
 
 - A Discord bot token (see [Discord Developer Portal](https://discord.com/developers/applications))
-- Access to [Google's Gemma-3-4b-it model](https://huggingface.co/google/gemma-3-4b-it)
+- Access to [Google's Gemma-3-4b-it-qat-q4_0-gguf](https://huggingface.co/google/gemma-3-4b-it-qat-q4_0-gguf)
 
 ## Setup Instructions
 
 ### 1. Obtain Model Access
 
-1. Request access to Google's Gemma-3-4b-it on [Hugging Face](https://huggingface.co/google/gemma-3-4b-it)
+1. Request access to Google's Gemma-3-4b-it-qat-q4_0-gguf on [Hugging Face](https://huggingface.co/google/gemma-3-4b-it-qat-q4_0-gguf)
 2. Clone or download the model to your local machine
 
 ### 2. Configure the Bot

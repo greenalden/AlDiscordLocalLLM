@@ -3,13 +3,12 @@ from datetime import datetime
 import re
 from discord.ext import commands
 import asyncio
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 import os
 import logging
+from llama_cpp import Llama
 
 DiscordBotToken = "" # Your Discord Bot Token Here
-LLM_dir = r""  # Your model path
+LLM_model_path = r""  # Path to GGUF model file gemma-3-4b-it-q4_0.gguf
 # Bot configuration
 NAME = "" # Name of the bot
 MAX_HISTORY_TURNS = 10  # Limit conversation history to this many turns (adjust based on your needs)
@@ -22,48 +21,25 @@ RESPONSE_TIMEOUT = 240  # Timeout for response generation in seconds
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[logging.FileHandler("bot_log.txt"), logging.StreamHandler()])
-logger = logging.getLogger("TetraBot")
+logger = logging.getLogger(NAME+"Bot")
 
-
-
-# Model paths
-current_dir = os.path.dirname(__file__)
-
-# Load the tokenizer
-logger.info(f"Loading tokenizer from {LLM_dir}")
+# Load the model with llama.cpp
+logger.info(f"Loading model from {LLM_model_path}")
 try:
-    tokenizer = AutoTokenizer.from_pretrained(LLM_dir)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-except Exception as e:
-    logger.error(f"Failed to load tokenizer: {e}")
-    raise
-
-# Load the model
-logger.info(f"Loading model from {LLM_dir}")
-try:
-    model = AutoModelForCausalLM.from_pretrained(
-        LLM_dir,
-        torch_dtype=torch.float32,
-        load_in_4bit=False,
-        device_map="auto"
+    # Adjust the n_threads to your CPU core count for optimal performance
+    model = Llama(
+        model_path=LLM_model_path,
+        n_ctx=4096,         # Context window size
+        n_threads=4,        # CPU threads - adjust based on your machine
+        n_gpu_layers=0      # Set to 0 to use CPU only
     )
+    logger.info("Model loaded successfully")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
     raise
 
 # Initialize conversation history - using a dict to track per-channel histories
 conversation_histories = {}
-
-class StopOnTokens(StoppingCriteria):
-    def __init__(self, stop_token_ids):
-        self.stop_token_ids = stop_token_ids
-
-    def __call__(self, input_ids, scores, **kwargs):
-        for stop_ids in self.stop_token_ids:
-            if torch.all(input_ids[0][-len(stop_ids):] == torch.tensor(stop_ids, device=input_ids.device)):
-                return True
-        return False
 
 def get_conversation_history(channel_id):
     """Get or create a conversation history for the specific channel"""
@@ -73,14 +49,9 @@ def get_conversation_history(channel_id):
 
 def clean_response(response, messageAuthor, timestamp=None):
     """Clean up the model's response"""
-
     print(messageAuthor)
 
     # Remove any trailing human/friend markers
-    
-
-
-
     response = re.split(r"\bHuman:|\bFriend:", response)[0].strip()
     
     # Remove timestamps
@@ -100,7 +71,6 @@ def clean_response(response, messageAuthor, timestamp=None):
 
     print(response)
 
-
     response = response.strip()
     try:
         response = response.removeprefix(messageAuthor + ": ")
@@ -117,7 +87,6 @@ def clean_response(response, messageAuthor, timestamp=None):
     except:
         pass
     response = response.strip()
-    
     
     return response.strip()
 
@@ -149,40 +118,19 @@ def generate_response(prompt, channel_id, messageAuthor):
     # Log the size of the prompt for debugging
     logger.info(f"Prompt length: {len(full_prompt)} chars, {len(full_prompt.split())} words")
     
-    # Tokenize with a reasonable max length
-    # 4096 is a common context window size, adjust as needed for your model
     try:
-        inputs = tokenizer(full_prompt, return_tensors="pt", padding=True, truncation=True, max_length=4096)
-        inputs = {k: v.to(model.device) for k, v in inputs.items()}
-    except Exception as e:
-        logger.error(f"Tokenization error: {e}")
-        return "Sorry, I encountered an error processing your message."
-    
-    # Set up stopping criteria
-    stop_token_ids = [
-        tokenizer.encode("Human:", add_special_tokens=False),
-        tokenizer.encode("Friend:", add_special_tokens=False)
-    ]
-    stopping_criteria = StoppingCriteriaList([StopOnTokens(stop_token_ids)])
-    
-    # Generate response
-    try:
-        with torch.no_grad():
-            outputs = model.generate(
-                input_ids=inputs['input_ids'],
-                attention_mask=inputs['attention_mask'],
-                max_new_tokens=500,
-                do_sample=True,
-                temperature=0.7,
-                top_p=0.9,
-                pad_token_id=tokenizer.pad_token_id,
-                eos_token_id=tokenizer.eos_token_id,
-                bos_token_id=tokenizer.bos_token_id,
-                stopping_criteria=stopping_criteria,
-            )
+        # Generate response using llama.cpp
+        output = model(
+            full_prompt,
+            max_tokens=500,
+            stop=["Human:", "Friend:"],
+            temperature=0.7,
+            top_p=0.9,
+            repeat_penalty=1.1
+        )
         
-        # Decode the response
-        response = tokenizer.decode(outputs[0, inputs['input_ids'].shape[-1]:], skip_special_tokens=True).strip()
+        # Extract the generated text
+        response = output["choices"][0]["text"].strip()
         
         # Clean up the response
         response = clean_response(response, messageAuthor)
